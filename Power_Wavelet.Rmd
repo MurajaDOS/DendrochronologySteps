@@ -1,0 +1,163 @@
+---
+title: "PowerGraphics"
+author: "Dani OS"
+date: "2023-07-12"
+output: pdf_document
+---
+
+```{r}
+cat("\014") 
+rm(list=ls()) 
+getwd() 
+```
+
+*SOI*
+```{r}
+# Ler os dados do arquivo CSV
+dados <- read.csv("POWERSOI_Canela.csv")
+
+# Acessar os valores das colunas
+normalized_power <- dados$normalized_power
+period <- dados$period
+
+png("CanelaSOI_POWER.png", width = 600, height = 400)
+
+plot(normalized_power, period, type = "l", xlab = "Average Wavelet Power", ylab = "Period", cex.lab = 1.5, cex.main = 4, xaxs = "i", ylim = rev(range(period)), main = "CAN RWI x SOI", font.lab = 2, col = "darkred", lwd = 2)
+# Adicionar negrito aos valores dos eixos
+axis(1, font = 2)
+axis(2, font = 2)
+
+dev.off()
+```
+*ATLSW*
+```{r}
+# Ler os dados do arquivo CSV
+dados <- read.csv("POWERATLSW_Canela.csv")
+
+# Acessar os valores das colunas
+normalized_power <- dados$normalized_power
+period <- dados$period
+
+png("CanelaATLSW_POWER.png", width = 600, height = 400)
+
+plot(normalized_power, period, type = "l", xlab = "Average Wavelet Power", ylab = "Period", cex.lab = 1.5, cex.main = 4, xaxs = "i", ylim = rev(range(period)), main = "CAN RWI x ATLSW", font.lab = 2, col = "darkred", lwd = 2)
+# Adicionar negrito aos valores dos eixos
+axis(1, font = 2)
+axis(2, font = 2)
+
+dev.off()
+```
+
+*NINO34*
+```{r}
+# Ler os dados do arquivo CSV
+dados <- read.csv("POWERNINO34_Canela.csv")
+
+# Acessar os valores das colunas
+normalized_power <- dados$normalized_power
+period <- dados$period
+
+png("CanelaNINO34_POWER.png", width = 600, height = 400)
+
+plot(normalized_power, period, type = "l", xlab = "Average Wavelet Power", ylab = "Period", cex.lab = 1.5, cex.main = 4, xaxs = "i", ylim = rev(range(period)), main = "CAN RWI x NIÑO 3.4", font.lab = 2, col = "darkred", lwd = 2)
+# Adicionar negrito aos valores dos eixos
+axis(1, font = 2)
+axis(2, font = 2)
+
+dev.off()
+```
+
+*SUNSPOT*
+```{r}
+# Ler os dados do arquivo CSV
+dados <- read.csv("POWERSUNSPOT_Canela.csv")
+
+# Acessar os valores das colunas
+normalized_power <- dados$normalized_power
+period <- dados$period
+
+png("CanelaSUNSPOT_POWER.png", width = 600, height = 400)
+
+plot(normalized_power, period, type = "l", xlab = "Average Wavelet Power", ylab = "Period", cex.lab = 1.5, cex.main = 4, xaxs = "i", ylim = rev(range(period)), main = "CAN RWI x SUNSPOT", font.lab = 2, col = "darkred", lwd = 2)
+# Adicionar negrito aos valores dos eixos
+axis(1, font = 2)
+axis(2, font = 2)
+
+dev.off()
+```
+
+*PREC*
+```{r}
+# Ler os dados do arquivo CSV
+dados <- read.csv("POWERPREC_Caxias_Canela.csv")
+
+# Acessar os valores das colunas
+normalized_power <- dados$normalized_power
+period <- dados$period
+
+png("CanelaPREC_POWER.png", width = 600, height = 400)
+
+plot(normalized_power, period, type = "l", xlab = "Average Wavelet Power", ylab = "Period", cex.lab = 1.5, cex.main = 4, xaxs = "i", ylim = rev(range(period)), main = "CAN RWI x PREC", font.lab = 2, col = "darkred", lwd = 2)
+# Adicionar negrito aos valores dos eixos
+axis(1, font = 2)
+axis(2, font = 2)
+
+dev.off()
+```
+
+*TMAX*
+```{r}
+# Ler os dados do arquivo CSV
+dados <- read.csv("POWERTMAX_Caxias_Canela.csv")
+
+# Acessar os valores das colunas
+normalized_power <- dados$normalized_power
+period <- dados$period
+
+png("CanelaTMAX_POWER.png", width = 600, height = 400)
+
+plot(normalized_power, period, type = "l", xlab = "Average Wavelet Power", ylab = "Period", cex.lab = 1.5, cex.main = 4, xaxs = "i", ylim = rev(range(period)), main = "CAN RWI x TMAX", font.lab = 2, col = "darkred", lwd = 2)
+# Adicionar negrito aos valores dos eixos
+axis(1, font = 2)
+axis(2, font = 2)
+
+dev.off()
+```
+
+*TMEAN*
+```{r}
+# Ler os dados do arquivo CSV
+dados <- read.csv("POWERTMEAN_Caxias_Canela.csv")
+
+# Acessar os valores das colunas
+normalized_power <- dados$normalized_power
+period <- dados$period
+
+png("CanelaTMEAN_POWER.png", width = 600, height = 400)
+
+plot(normalized_power, period, type = "l", xlab = "Average Wavelet Power", ylab = "Period", cex.lab = 1.5, cex.main = 4, xaxs = "i", ylim = rev(range(period)), main = "CAN RWI x TMEAN", font.lab = 2, col = "darkred", lwd = 2)
+# Adicionar negrito aos valores dos eixos
+axis(1, font = 2)
+axis(2, font = 2)
+
+dev.off()
+```
+
+*TMIN*
+```{r}
+# Ler os dados do arquivo CSV
+dados <- read.csv("POWERTMIN_Caxias_Canela.csv")
+
+# Acessar os valores das colunas
+normalized_power <- dados$normalized_power
+period <- dados$period
+
+png("CanelaTMIN_POWER.png", width = 600, height = 400)
+
+plot(normalized_power, period, type = "l", xlab = "Average Wavelet Power", ylab = "Period", cex.lab = 1.5, cex.main = 4, xaxs = "i", ylim = rev(range(period)), main = "CAN RWI x TMIN", font.lab = 2, col = "darkred", lwd = 2)
+# Adicionar negrito aos valores dos eixos
+axis(1, font = 2)
+axis(2, font = 2)
+
+dev.off()
+```
