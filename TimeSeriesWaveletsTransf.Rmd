@@ -1,0 +1,120 @@
+---
+title: "Time Series Wavelet Transform"
+author: "Muraja DOS"
+date: "2023-06-18"
+output: pdf_document
+---
+
+**Clear the console and the variables + tell your actual directory**
+```{r}
+cat("\014") 
+rm(list=ls()) 
+getwd() 
+```
+
+**Ring Width Index (RWI) Wavelet Transform**
+```{r}
+library(dplR)
+rwi <- read.table('Chronology_Stabilized_Trees_Canela.txt', header = TRUE)
+ca533.crn <- rwi
+Years <- as.numeric(rownames(rwi))
+CAMstd <- ca533.crn[, 1]
+
+# Need to set the p2 value for each series
+out.wave <- morlet(y1 = CAMstd, x1 = Years, p2 = 5, dj = 0.001, siglvl = 0.95)
+
+# Save the wavelet list to a file
+saveRDS(out.wave, file = "wavelet_RWI_Canela.rds")
+
+# Save first plot as PNG
+#png("wavelet1_SeveriandoAlmeida.png", width = 800, height = 600)
+#wavelet.plot(out.wave, useRaster = NA, reverse.y = TRUE)
+#title("SeveriandoAlmeida RWI Wavelet Transform", line = 0.5, cex.main = 1.2)
+#dev.off()
+
+# Alternative palette with better separation of colors
+specCols <- c("#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4", "#E6F598",
+               "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142")
+
+# Save second plot as PNG
+# Save second plot as PNG
+png("wavelet2_Canela.png", width = 800, height = 600)
+
+# Set the font size, style, and size of the axis labels and names
+par(cex.axis = 1.5, font.axis = 2, cex.lab = 1.5)
+
+# Create the wavelet plot with modified y-axis title and legend title
+wavelet.plot(out.wave, key.cols = specCols, useRaster = NA, reverse.y = TRUE,
+             ylab = list(label = "RWI", cex.lab = 2.5),
+             main.key = list(label = "Power", cex.lab = 2.5))
+
+# Add the title with modified font size
+title("Canela RWI Wavelet Transform", line = 1, cex.main = 1.5)
+
+dev.off()
+
+
+# fewer colors
+#levs <- quantile(out.wave$Power, probs = c(0, 0.5, 0.75, 0.9, 0.99))
+
+# Save third plot as PNG
+#png("wavelet3_Severiando de Almeida.png", width = 800, height = 600)
+#wavelet.plot(out.wave, wavelet.levels = levs, add.sig = TRUE,
+#              key.cols = c("#FFFFFF", "#ABDDA4", "#FDAE61", "#D7191C"), useRaster = NA, reverse.y = TRUE)
+#title("Severiando de Almeida RWI Wavelet Transform", line = 0.5, cex.main = 1.2)
+#dev.off()
+
+
+
+```
+
+
+
+**Sunspot Wavelet Transform**
+```{r}
+rwi <- read.table('SUNSPOT_data.txt', header = FALSE)
+ca533.crn <- rwi
+Years <- as.numeric(rwi[,1])
+yearly_data <- rowMeans(rwi[, -1], na.rm = TRUE)  # Sums across columns, excluding the first column (Year)
+
+# need to set the p2 value for each series
+out.wave <- morlet(y1 = yearly_data, x1 = Years, p2 = 7, dj = 0.001, siglvl = 0.95)
+
+# Save first plot as PNG
+#png("wavelet1_SUNSPOT.png", width = 800, height = 600)
+#wavelet.plot(out.wave, useRaster = NA)
+#title("SUNSPOT Wavelet Transform", line = 0.5, cex.main = 1.2)
+#dev.off()
+
+
+## Not run:
+# Alternative palette with better separation of colors
+specCols <- c("#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4", "#E6F598",
+               "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142")
+
+# Save second plot as PNG
+png("wavelet2_SUNSPOT.png", width = 800, height = 600)
+
+par(cex.axis = 1.5, font.axis = 2, cex.lab = 1.5)
+wavelet.plot(out.wave, key.cols = specCols, useRaster = NA, reverse.y = TRUE,
+             ylab = list(label = "SUNSPOT", cex.lab = 2.5),  # Modify the label here
+             main.key = list(label = "Power", cex.lab = 2.5))
+title("SUNSPOT Wavelet Transform", line = 0.5, cex.main = 1.2)
+dev.off()
+
+# fewer colors
+#levs <- quantile(out.wave$Power, probs = c(0, 0.5, 0.75, 0.9, 0.99))
+
+# Save third plot as PNG
+#png("wavelet3_SUNSPOT.png", width = 800, height = 600)
+#wavelet.plot(out.wave, wavelet.levels = levs, add.sig = TRUE,
+#              key.cols = c("#FFFFFF", "#ABDDA4", "#FDAE61", "#D7191C"), useRaster = NA)
+#title("SUNSPOT Wavelet Transform", line = 0.5, cex.main = 1.2)
+#dev.off()
+
+# Assuming you have a wavelet list named "wavelet_list"
+
+# Save the wavelet list to a file
+saveRDS(out.wave, file = "wavelet_sunspot.rds")
+
+```
