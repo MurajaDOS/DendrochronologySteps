@@ -1,0 +1,131 @@
+---
+title: "CrossWavelets"
+author: "Dani OS"
+date: "2023-06-29"
+output: pdf_document
+---
+
+**Clear the console and the variables + tell your actual directory**
+```{r}
+cat("\014") 
+rm(list=ls()) 
+getwd() 
+```
+
+
+*Some of the Packages*
+```{r}
+library(biwavelet)
+library(fields)
+```
+
+**SUNSPOT**
+
+**Cross Wavelet Coherence**
+```{r}
+# Read the wavelet lists
+wavelet_RWI <- readRDS(file = "wavelet_RWI_Canela.rds")
+wavelet_SUNSPOT <- readRDS(file = "wavelet_SUNSPOT.rds")
+
+# Extract the time series from the wavelet lists
+time_RWI <- wavelet_RWI$x
+values_RWI <- wavelet_RWI$y
+
+time_SUNSPOT <- wavelet_SUNSPOT$x
+values_SUNSPOT <- wavelet_SUNSPOT$y
+
+# Find the common time series range
+start_time <- max(min(time_RWI), min(time_SUNSPOT))
+end_time <- min(max(time_RWI), max(time_SUNSPOT))
+
+# Filter the time series within the common range
+time_RWI_filtered <- time_RWI[time_RWI >= start_time & time_RWI <= end_time]
+values_RWI_filtered <- values_RWI[time_RWI >= start_time & time_RWI <= end_time]
+
+time_SUNSPOT_filtered <- time_SUNSPOT[time_SUNSPOT >= start_time & time_SUNSPOT <= end_time]
+values_SUNSPOT_filtered <- values_SUNSPOT[time_SUNSPOT >= start_time & time_SUNSPOT <= end_time]
+
+# Create matrices with filtered time series
+data_RWI <- cbind(time_RWI_filtered, values_RWI_filtered)
+data_SUNSPOT <- cbind(time_SUNSPOT_filtered, values_SUNSPOT_filtered)
+
+# Perform wavelet coherence analysis
+coherence <- wtc(data_RWI, data_SUNSPOT)
+
+library(extrafont)
+loadfonts()
+
+png("CanelaSUNSPOT_CrossCoherence.png", width = 800, height = 600)
+
+# Set up the layout
+layout(matrix(c(1, 2, 3), nrow = 3, ncol = 1, byrow = TRUE), heights = c(1, 1, 2.5))
+
+# Plot the SUNSPOT time series with adjusted size
+par(mar = c(4.5, 4.5, 2, 1))
+plot(time_SUNSPOT_filtered, values_SUNSPOT_filtered, type = "l", xlab = "Time", ylab = "SUNSPOT",
+     main = "SUNSPOT Time Series", cex.lab = 1.5, cex.main = 2, xaxs = "i", font.axis = 2, font.lab = 2, cex.axis = 1.5, lwd = 2)
+
+# Plot the RWI time series with adjusted size
+par(mar = c(4.5, 4.5, 2, 1))
+plot(time_RWI_filtered, values_RWI_filtered, type = "l", xlab = "Time", ylab = "RWI",
+     main = "Canela RWI Time Series", cex.lab = 1.5, cex.main = 2, xaxs = "i", font.axis = 2, font.lab = 2, cex.axis = 1.5, lwd = 2)
+
+# Adjust the size of the wavelet plot and figure margins
+par(mar = c(8, 4.5, 2, 1))
+
+
+
+# Plot the wavelet coherence and phase difference using plot.biwavelet with type = "power.corr"
+plot.biwavelet(
+  coherence,
+  plot.cb = TRUE,
+  plot.phase = TRUE,
+  type = "power.norm",
+  arrow.len = 0.15,
+  arrow.col = "white",
+  arrow.lwd = 0.05,
+  plot.sig = TRUE,
+  legend.horiz = TRUE,
+  arr.length = 1.5,
+  fill.cols = c("#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", "#FEE08B",
+                "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"),
+  main = "Cross Wavelet Coherence",
+  cex.lab = 1.5,
+  cex.main = 2,
+  font.axis = 2,
+  font.lab = 2,
+  cex.axis = 1.5,
+  cex.lab.axis = 1.5,
+  zlim = c(0, 1)  # Adjust the maximum value here
+)
+
+
+
+
+dev.off()
+
+# Details
+# Arrows pointing to the right mean that x and y are in phase.
+# Arrows pointing to the left mean that x and y are in anti-phase.
+# Arrows pointing up mean that y leads x by π/2.
+# Arrows pointing down mean that x leads y by π/2.
+# An arrow in the wavelet coherence plots represents the lead/lag phase relations between the examined series. A zero phase difference means that the two time series move together on a particular scale. Arrows point to the right (left) when the time series are in phase (anti-phase)
+```
+
+*POWER GRAPHIC*
+```{r}
+# Square the power values to obtain GWPS
+gwps <- coherence$power^2
+
+# Calculate average wavelet power across frequencies for each time point
+average_wavelet_power <- rowMeans(gwps)
+
+# Normalize the average wavelet power between 0 and 1
+normalized_power <- (average_wavelet_power - min(average_wavelet_power)) / (max(average_wavelet_power) - min(average_wavelet_power))
+
+
+# Salvar os dados em um arquivo CSV
+data <- data.frame(normalized_power, period = coherence$period)
+write.csv(data, file = "POWERSUNSPOT_Canela.csv", row.names = FALSE)
+
+```
