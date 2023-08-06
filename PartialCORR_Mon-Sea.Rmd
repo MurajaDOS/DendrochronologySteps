@@ -1,0 +1,353 @@
+---
+title: "PartialCorrSeason.Rmd"
+author: "Dani OS"
+date: "2023-06-11"
+output: pdf_document
+---
+
+#SEASONS WERE BASED ON http://estacao.iag.usp.br/seasons/index.php#:~:text=Ver%C3%A3o%3A%20Dezembro%2C%20Janeiro%20e%20Fevereiro%20(DJF)
+
+**Clear the console and the variables + tell your actual directory**
+```{r}
+cat("\014") 
+rm(list=ls()) 
+getwd() 
+```
+
+
+**PARTIAL CORRELATION** 
+
+**MONTHLY**
+
+*PRECIPITATION EXCLUDING TMAX*
+```{r}
+# Load the required package
+library(ppcor)
+
+# Read the data
+RWI <- read.table("Chronology_Stabilized_Trees_canela.txt", header = TRUE)
+precipitation <- read.csv("PREC_CAXIAS_MEANIMP.csv")
+temperature_max <- read.csv("TEMPMAX_CAXIAS_MEANIMP.csv")
+
+# Extract the relevant variables from the data
+rwi <- RWI$RWI[1:nrow(temperature_max)]  # Subset the first 31 rows of RWI
+precip <- precipitation[1:nrow(temperature_max), -1]  # Subset the first 31 rows, exclude the Year column
+tmax <- temperature_max[1:nrow(temperature_max), -1]  # Subset the first 31 rows, exclude the Year column
+
+# Create a data frame to store correlation coefficients and p-values
+cor_table <- data.frame(Month = colnames(precip), Correlation = numeric(ncol(precip)), p_value = numeric(ncol(precip)))
+
+# Calculate the correlations and p-values for each month
+for (i in 1:ncol(precip)) {
+  data <- data.frame(RWI = rwi, Precipitation = precip[, i], TemperatureMax = tmax[, i])
+  cor_result <- spcor(data, method = "pearson")
+  cor_table[i, "Correlation"] <- cor_result$estimate[1, 2]
+  cor_table[i, "p_value"] <- cor_result$p.value[1, 2]
+}
+
+# Print the correlation table
+print(cor_table)
+write.csv(cor_table,"MONTHLYpartialcorr_PRCPTMAX.csv")
+cor_table_monthly_prcptmax <- cor_table
+```
+
+
+*PRECIPITATION EXCLUDING TMED*
+```{r}
+# Load the required package
+library(ppcor)
+
+# Read the data
+RWI <- read.table("Chronology_Stabilized_Trees_canela.txt", header = TRUE)
+precipitation <- read.csv("PREC_CAXIAS_MEANIMP.csv")
+temperature_mean <- read.csv("TEMPMED_CAXIAS_MEANIMP.csv")
+
+# Extract the relevant variables from the data
+rwi <- RWI$RWI[1:nrow(temperature_max)]  # Subset the first 31 rows of RWI
+precip <- precipitation[1:nrow(temperature_max), -1]  # Subset the first 31 rows, exclude the Year column
+tmean <- temperature_mean[1:nrow(temperature_max), -1]  # Subset the first 31 rows, exclude the Year column
+
+# Create a data frame to store correlation coefficients and p-values
+cor_table <- data.frame(Month = colnames(precip), Correlation = numeric(ncol(precip)), p_value = numeric(ncol(precip)))
+
+# Calculate the correlations and p-values for each month
+for (i in 1:ncol(precip)) {
+  data <- data.frame(RWI = rwi, Precipitation = precip[, i], TemperatureMean = tmean[, i])
+  cor_result <- spcor(data, method = "pearson")
+  cor_table[i, "Correlation"] <- cor_result$estimate[1, 2]
+  cor_table[i, "p_value"] <- cor_result$p.value[1, 2]
+}
+
+# Print the correlation table
+print(cor_table)
+write.csv(cor_table, "MONTHLYpartialcorr_PRCPTMEAN.csv")
+cor_table_monthly_prcptmed <- cor_table
+```
+
+*PRECIPITATION EXCLUDING TMIN*
+```{r}
+# Load the required package
+library(ppcor)
+
+# Read the data
+RWI <- read.table("Chronology_Stabilized_Trees_canela.txt", header = TRUE)
+precipitation <- read.csv("PREC_CAXIAS_MEANIMP.csv")
+temperature_min <- read.csv("TEMPMIN_CAXIAS_MEANIMP.csv")
+
+# Extract the relevant variables from the data
+rwi <- RWI$RWI[1:nrow(temperature_max)]  # Subset the first 31 rows of RWI
+precip <- precipitation[1:nrow(temperature_max), -1]  # Subset the first 31 rows, exclude the Year column
+tmin <- temperature_min[1:nrow(temperature_max), -1]  # Subset the first 31 rows, exclude the Year column
+
+# Create a data frame to store correlation coefficients and p-values
+cor_table <- data.frame(Month = colnames(precip), Correlation = numeric(ncol(precip)), p_value = numeric(ncol(precip)))
+
+# Calculate the correlations and p-values for each month
+for (i in 1:ncol(precip)) {
+  data <- data.frame(RWI = rwi, Precipitation = precip[, i], TemperatureMin = tmin[, i])
+  cor_result <- spcor(data, method = "pearson")
+  cor_table[i, "Correlation"] <- cor_result$estimate[1, 2]
+  cor_table[i, "p_value"] <- cor_result$p.value[1, 2]
+}
+
+# Print the correlation table
+print(cor_table)
+write.csv(cor_table, "MONTHLYpartialcorr_PRCPTMIN.csv")
+cor_table_monthly_prcptmin <- cor_table
+```
+
+
+**Graphic for Monthly partial correlation**
+```{r}
+library(ggplot2)
+library(cowplot)
+
+# Function to generate correlation plots
+generate_correlation_plot <- function(correlation_table, title) {
+  plot <- ggplot(correlation_table, aes(x = Month, y = Correlation, fill = Month)) +
+    geom_bar(stat = "identity", position = "dodge", color = "black") +
+    labs(title = title, x = "Months", y = "Correlation") +
+    theme_minimal() +
+    theme(legend.position = "none")
+  
+  return(plot)
+}
+
+# Create correlation plots for each table
+plot_monthly_prcptmax <- generate_correlation_plot(cor_table_monthly_prcptmax, "Canela Monthly Correlation RWI - Prec. excluding TMax")
+plot_monthly_prcptmed <- generate_correlation_plot(cor_table_monthly_prcptmed, "Canela Monthly Correlation RWI - Prec. excluding TMean")
+plot_monthly_prcptmin <- generate_correlation_plot(cor_table_monthly_prcptmin, "Canela Monthly Correlation RWI - Prec. excluding TMin")
+
+# Combine the plots into a single figure with rows
+figure <- cowplot::plot_grid(
+  plot_monthly_prcptmax, 
+  plot_monthly_prcptmed, 
+  plot_monthly_prcptmin,
+  ncol = 1, labels = c("A", "B", "C")
+)
+
+# Display the combined plot
+print(figure)
+
+```
+
+
+################################################################################
+```{r}
+cat("\014") 
+rm(list=ls()) 
+getwd() 
+```
+
+**SEASONAL**
+
+*PARTIAL CORRELATION WITH PRECIPITATION EXCLUDING TMAX*
+```{r}
+# Load the required package
+library(ppcor)
+
+# Read the data
+RWI <- read.table("Chronology_Stabilized_Trees_canela.txt", header = TRUE)
+precipitation <- read.csv("PREC_CAXIAS_MEANIMP.csv")
+temperature_max <- read.csv("TEMPMAX_CAXIAS_MEANIMP.csv")
+
+# Extract the relevant variables from the data
+rwi <- RWI$RWI[1:nrow(temperature_max)]  # Subset the first 31 rows of RWI
+
+# Define the months corresponding to each season
+season_months <- list(
+  Summer = c(12, 1, 2),
+  Autumn = c(3, 4, 5),
+  Winter = c(6, 7, 8),
+  Spring = c(9, 10, 11)
+)
+
+# Create a function to calculate seasonal means
+calculate_seasonal_means <- function(data, months) {
+  seasons <- lapply(months, function(x) rowMeans(data[, x, drop = FALSE], na.rm = TRUE))
+  seasons_df <- as.data.frame(do.call(cbind, seasons))
+  colnames(seasons_df) <- names(months)
+  return(seasons_df)
+}
+
+# Calculate seasonal means for precipitation
+precip_seasons <- calculate_seasonal_means(precipitation[1:nrow(temperature_max), -1], season_months)
+
+# Calculate seasonal means for temperature_max
+tmax_seasons <- calculate_seasonal_means(temperature_max[1:nrow(temperature_max), -1], season_months)
+
+# Create a data frame to store correlation coefficients and p-values
+cor_table <- data.frame(Month = colnames(precip_seasons), Correlation = numeric(ncol(precip_seasons)), p_value = numeric(ncol(precip_seasons)))
+
+# Calculate the correlations and p-values for each month
+for (i in 1:ncol(precip_seasons)) {
+  data <- data.frame(RWI = rwi, Precipitation = precip_seasons[, i], TemperatureMax = tmax_seasons[, i])
+  cor_result <- spcor(data, method = "pearson")
+  cor_table[i, "Correlation"] <- cor_result$estimate[1, 2]
+  cor_table[i, "p_value"] <- cor_result$p.value[1, 2]
+}
+
+# Print the correlation table
+print(cor_table)
+write.csv(cor_table,"SEASONALpartialcorr_PRCPTMAX.csv")
+cor_table_seasonal_prcptmax <- cor_table
+```
+
+*PARTIAL CORRELATION WITH PRECIPITATION EXCLUDING TMED*
+```{r}
+# Load the required package
+library(ppcor)
+
+# Read the data
+RWI <- read.table("Chronology_Stabilized_Trees_canela.txt", header = TRUE)
+precipitation <- read.csv("PREC_CAXIAS_MEANIMP.csv")
+temperature_mean <- read.csv("TEMPMED_CAXIAS_MEANIMP.csv")
+
+# Extract the relevant variables from the data
+rwi <- RWI$RWI[1:nrow(temperature_max)]  # Subset the first 31 rows of RWI
+
+# Define the months corresponding to each season
+season_months <- list(
+  Summer = c(12, 1, 2),
+  Autumn = c(3, 4, 5),
+  Winter = c(6, 7, 8),
+  Spring = c(9, 10, 11)
+)
+
+# Create a function to calculate seasonal means
+calculate_seasonal_means <- function(data, months) {
+  seasons <- lapply(months, function(x) rowMeans(data[, x, drop = FALSE], na.rm = TRUE))
+  seasons_df <- as.data.frame(do.call(cbind, seasons))
+  colnames(seasons_df) <- names(months)
+  return(seasons_df)
+}
+
+# Calculate seasonal means for precipitation
+precip_seasons <- calculate_seasonal_means(precipitation[1:nrow(temperature_max), -1], season_months)
+
+# Calculate seasonal means for temperature_max
+tmean_seasons <- calculate_seasonal_means(temperature_mean[1:nrow(temperature_max), -1], season_months)
+
+# Create a data frame to store correlation coefficients and p-values
+cor_table <- data.frame(Month = colnames(precip_seasons), Correlation = numeric(ncol(precip_seasons)), p_value = numeric(ncol(precip_seasons)))
+
+# Calculate the correlations and p-values for each month
+for (i in 1:ncol(precip_seasons)) {
+  data <- data.frame(RWI = rwi, Precipitation = precip_seasons[, i], TemperatureMean = tmean_seasons[, i])
+  cor_result <- spcor(data, method = "pearson")
+  cor_table[i, "Correlation"] <- cor_result$estimate[1, 2]
+  cor_table[i, "p_value"] <- cor_result$p.value[1, 2]
+}
+
+# Print the correlation table
+print(cor_table)
+write.csv(cor_table,"SEASONALpartialcorr_PRCPTMEAN.csv")
+cor_table_seasonal_prcptmean <- cor_table
+
+```
+
+
+*PARTIAL CORRELATION WITH PRECIPITATION EXCLUDING TMIN*
+```{r}
+# Load the required package
+library(ppcor)
+
+# Read the data
+RWI <- read.table("Chronology_Stabilized_Trees_canela.txt", header = TRUE)
+precipitation <- read.csv("PREC_CAXIAS_MEANIMP.csv")
+temperature_min <- read.csv("TEMPMIN_CAXIAS_MEANIMP.csv")
+
+# Extract the relevant variables from the data
+rwi <- RWI$RWI[1:nrow(temperature_max)]  # Subset the first 31 rows of RWI
+
+# Define the months corresponding to each season
+season_months <- list(
+  Summer = c(12, 1, 2),
+  Autumn = c(3, 4, 5),
+  Winter = c(6, 7, 8),
+  Spring = c(9, 10, 11)
+)
+
+# Create a function to calculate seasonal means
+calculate_seasonal_means <- function(data, months) {
+  seasons <- lapply(months, function(x) rowMeans(data[, x, drop = FALSE], na.rm = TRUE))
+  seasons_df <- as.data.frame(do.call(cbind, seasons))
+  colnames(seasons_df) <- names(months)
+  return(seasons_df)
+}
+
+# Calculate seasonal means for precipitation
+precip_seasons <- calculate_seasonal_means(precipitation[1:nrow(temperature_max), -1], season_months)
+
+# Calculate seasonal means for temperature_min
+tmin_seasons <- calculate_seasonal_means(temperature_min[1:nrow(temperature_max), -1], season_months)
+
+# Create a data frame to store correlation coefficients and p-values
+cor_table <- data.frame(Month = colnames(precip_seasons), Correlation = numeric(ncol(precip_seasons)), p_value = numeric(ncol(precip_seasons)))
+
+# Calculate the correlations and p-values for each month
+for (i in 1:ncol(precip_seasons)) {
+  data <- data.frame(RWI = rwi, Precipitation = precip_seasons[, i], TemperatureMax = tmin_seasons[, i])
+  cor_result <- spcor(data, method = "pearson")
+  cor_table[i, "Correlation"] <- cor_result$estimate[1, 2]
+  cor_table[i, "p_value"] <- cor_result$p.value[1, 2]
+}
+
+# Print the correlation table
+print(cor_table)
+write.csv(cor_table,"SEASONALpartialcorr_PRCPTMIN.csv")
+cor_table_seasonal_prcptmin <- cor_table
+```
+
+**Graphic for Seasonal partial correlation**
+```{r}
+library(ggplot2)
+library(cowplot)
+
+# Function to generate correlation plots
+generate_correlation_plot <- function(correlation_table, title) {
+  plot <- ggplot(correlation_table, aes(x = Month, y = Correlation, fill = Month)) +
+    geom_bar(stat = "identity", position = "dodge", color = "black") +
+    labs(title = title, x = "Months", y = "Correlation") +
+    theme_minimal() +
+    theme(legend.position = "none")
+  
+  return(plot)
+}
+
+# Create correlation plots for each table
+plot_monthly_prcptmax <- generate_correlation_plot(cor_table_seasonal_prcptmax, "Canela Seasonal Correlation RWI - Prec. excluding TMax")
+plot_monthly_prcptmed <- generate_correlation_plot(cor_table_seasonal_prcptmean, "Canela Seasonal Correlation RWI - Prec. excluding TMean")
+plot_monthly_prcptmin <- generate_correlation_plot(cor_table_seasonal_prcptmin, "Canela Seasonal Correlation RWI - Prec. excluding TMin")
+
+# Combine the plots into a single figure with rows
+figure <- cowplot::plot_grid(
+  plot_monthly_prcptmax, 
+  plot_monthly_prcptmed, 
+  plot_monthly_prcptmin,
+  ncol = 1, labels = c("A", "B", "C")
+)
+
+# Display the combined plot
+print(figure)
+```
